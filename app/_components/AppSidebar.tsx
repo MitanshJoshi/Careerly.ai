@@ -11,35 +11,35 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import { Calendar, Home, Inbox, Layers, Search, Settings, UserCheck, UserCheckIcon, UserCircle, Wallet } from "lucide-react"
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 const items = [
     {
-        title: "Home",
+        title: "Workspace",
         url: "#",
-        icon: Home,
+        icon: Layers,
     },
     {
-        title: "Inbox",
+        title: "AI Tools",
         url: "#",
         icon: Inbox,
     },
     {
-        title: "Calendar",
+        title: "My History",
         url: "#",
         icon: Calendar,
     },
     {
-        title: "Search",
-        url: "#",
-        icon: Search,
+        title: "Billing",
+        url: "/billing",
+        icon: Wallet,
     },
     {
-        title: "Settings",
-        url: "#",
-        icon: Settings,
+        title: "Profile",
+        url: "/profile",
+        icon: UserCircle,
     },
 ]
 
@@ -48,17 +48,16 @@ export function AppSidebar() {
     return (
         <Sidebar>
             <SidebarHeader>
-                <div className='p-4'>
-                    <Image src={'./logo.svg'} alt='logo' width={100} height={100}
-                        className='w-full h-full' />
-                    <h2 className='text-sm text-gray-400 text-center'>Build Awesome</h2>
-                </div>
+            <div className='p-4 flex  items-center'>
+            <Image src={'/logo.webp'} alt="Careerly.Ai logo" width={40} height={40} />
+            <span className="text-xl font-bold text-[#025B9D] ml-2 tracking-tight">Careerly.Ai</span>
+          </div>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
 
                     <SidebarGroupContent>
-                        <SidebarMenu className='mt-5'>
+                        <SidebarMenu>
                             {items.map((item, index) => (
                                 // <SidebarMenuItem key={item.title} className='p-2'>
                                 //     <SidebarMenuButton asChild className=''>
