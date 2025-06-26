@@ -1,6 +1,13 @@
+"use client";
+
 import Button from '@/components/CustomButton';
+import { useUser } from '@clerk/nextjs';
+import axios from 'axios';
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
 import React from 'react'
+import {v4 as uuidv4} from 'uuid';
+import ResumeUploadDialog from './ResumeUploadDialog';
 
 interface AiTool {
     name: string;
@@ -15,6 +22,24 @@ interface AiToolsListProps {
 }
 
 const AiToolsList: React.FC<AiToolsListProps> = ({ aiToolsList }) => {
+    const {user} = useUser();
+    const router = useRouter();
+    const [openResumeDialog, setOpenResumeDialog] = React.useState(false);  
+
+
+    const onClickHandler = async (tool: AiTool) => {
+        if(tool.name === "AI Resume Analyzer") {
+            setOpenResumeDialog(true);
+            return;
+        }
+        const id = uuidv4();
+        const result = await axios.post("/api/history", {
+            content: [],
+            recordedId: id, 
+        });
+        console.log("History Recorded:", result.data);
+        router.push(`${tool.path}/${id}`);
+    }
   return (
       <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
         {aiToolsList.map((tool, index) => (
@@ -28,13 +53,14 @@ const AiToolsList: React.FC<AiToolsListProps> = ({ aiToolsList }) => {
                 </div>
                 <p className='text-gray-600 mb-4 flex-1'>{tool.description}</p>
                 <Button
-                href={tool.path}
+                onClick={()=>onClickHandler(tool)}
                 >
                     
                 {tool.button}
                 </Button>
-            </div>
+            </div>         
         ))}
+        <ResumeUploadDialog openResumeDialog = {openResumeDialog} setOpenResumeDialog={setOpenResumeDialog}/>
     </div>
   )
 }

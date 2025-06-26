@@ -6,24 +6,25 @@ import styled from 'styled-components';
 interface NormalButtonProps {
   children: string;
   href?: string;
+  onClick?: () => void; 
 }
 
-const NormalButton: React.FC<NormalButtonProps> = ({ children, href = "#" }) => {
+const NormalButton: React.FC<NormalButtonProps> = ({ children, href = "#", onClick }) => {
   const chars = children.split('');
   return (
     <StyledWrapper>
       <a href={href}>
-        <button type="button">
-        <span className="span-mother">
+        <button type="button" onClick={onClick}>
+          <span className="span-mother">
             {chars.map((char, i) => (
-                <span key={`top-${i}`}>{char === ' ' ? '\u00A0' : char}</span>
+              <span key={`top-${i}`}>{char === ' ' ? '\u00A0' : char}</span>
             ))}
-            </span>
-            <span className="span-mother2">
+          </span>
+          <span className="span-mother2">
             {chars.map((char, i) => (
-                <span key={`bottom-${i}`}>{char === ' ' ? '\u00A0' : char}</span>
+              <span key={`bottom-${i}`}>{char === ' ' ? '\u00A0' : char}</span>
             ))}
-            </span>
+          </span>
         </button>
       </a>
     </StyledWrapper>

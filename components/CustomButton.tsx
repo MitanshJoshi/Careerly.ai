@@ -67,15 +67,17 @@ const StyledWrapper = styled.div`
 interface ButtonProps {
   children: React.ReactNode;
   href?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
-const Button: React.FC<ButtonProps> = ({ children, href = "#" }) => {
+const Button: React.FC<ButtonProps> = ({ children, href = "#", onClick }) => {
   return (
     <StyledWrapper>
       <a
         href={href}
         className="button1"
         style={{ '--clr': '#7808d0' } as React.CSSProperties}
+        onClick={onClick}
       >
         <span className="button1__icon-wrapper">
           <svg viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="button1__icon-svg" width={10}>
