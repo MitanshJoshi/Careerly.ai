@@ -9,7 +9,7 @@ export async function POST(req:any){
         name: "ai-career-chat",
         data:{
             userInput: userInput
-        }
+        } 
     });
 
     const runId = resultIds?.ids[0];
