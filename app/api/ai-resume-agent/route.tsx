@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 import axios from "axios";
 import { inngest } from "@/inngest/client";
+import { currentUser } from "@clerk/nextjs/server";
  
 export async function POST(req: NextRequest)
 {
     const formData = await req.formData();
     const resumeFile = formData.get('resumeFile');
+    const user = await currentUser();
     const recordId = formData.get('recordId');
     
     let loader;
@@ -27,6 +29,8 @@ export async function POST(req: NextRequest)
             recordId: recordId,
             base64ResumeFile: base64,
             pdfText: docs[0]?.pageContent,
+            aiAgentType:'/ai-tools/ai-resume-analyzer',
+            userEmail: user?.primaryEmailAddress?.emailAddress || ""
         } 
     });
 
@@ -43,7 +47,7 @@ export async function POST(req: NextRequest)
         await new Promise(resolve => setTimeout(resolve, 500)); 
     }
     console.log("Returning:", runStatus);
-    return NextResponse.json(runStatus.data?.[0].output?.output[0]);
+    return NextResponse.json(runStatus.data?.[0]);
 }
 
 async function getRuns(runId: string) {

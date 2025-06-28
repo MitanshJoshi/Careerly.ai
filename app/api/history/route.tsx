@@ -5,14 +5,15 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(req: any){
-    const {content,recordedId} = await req.json();
+    const {content,recordedId, aiAgentType} = await req.json();
     const user = await currentUser();
     try{
          const result = await db.insert(HistoryTable).values({
             recordId: recordedId,
             content: content,
             userEmail:user?.primaryEmailAddress?.emailAddress || "",
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            aiAgentType: aiAgentType || "unknown"
          });
         return NextResponse.json(result);
 

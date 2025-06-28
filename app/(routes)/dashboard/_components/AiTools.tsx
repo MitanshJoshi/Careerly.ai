@@ -24,7 +24,7 @@ const aiToolsList = [
         description: "Create a personalized career roadmap with our AI-powered roadmap generator.",
         icon: "/roadmap.png",
         button:'Generate Roadmap',
-        path:'/career-roadmap-generator'
+        path:'/ai-tools/career-roadmap-generator'
     },
     {
         name: "Cover Letter Builder",

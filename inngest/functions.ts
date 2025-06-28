@@ -2,6 +2,8 @@ import { gemini, openai } from "inngest";
 import { inngest } from "./client";
 import ImageKit from "imagekit";
 import { createAgent, anthropic } from '@inngest/agent-kit';
+import { db } from "@/configs/db";
+import { HistoryTable } from "@/configs/schema";
 
 export const helloWorld = inngest.createFunction(
   { id: "hello-world" },
@@ -95,9 +97,18 @@ json
     }
   },
   "tips_for_improvement": [
-    "Add more numbers and metrics to your experience section to show impact.",
-    "Integrate more industry-specific keywords relevant to your target roles.",
-    "Start bullet points with strong action verbs to make your achievements stand out."
+    {
+      "title": "Enhance Skills Section",
+      "description": "Add more specific skills and proficiencies to demonstrate expertise."
+    },
+    {
+      "title": "Use Action Verbs",
+      "description": "Start bullet points with strong action verbs to make your achievements stand out."
+    },
+    {
+      "title": "Add Professional Summary",
+      "description": "Include a brief summary at the top to highlight your career goals and key qualifications."
+    }
   ],
   "whats_good": [
     "Clean and professional formatting.",
@@ -123,9 +134,9 @@ export const AiResumeAgent = inngest.createFunction(
   { event: "ai-resume-agent" },
 
   async ({ event, step }) => {
-    const { recordId, base64ResumeFile, pdfText } = await event.data;
+    const { recordId, base64ResumeFile, pdfText, aiAgentType, userEmail } = await event.data;
 
-    const uploadImageUrl = await step.run(
+    const uploadFileUrl = await step.run(
       "upload-image",
       async () => {
         const uploadResponse = await imagekit.upload({
@@ -139,7 +150,86 @@ export const AiResumeAgent = inngest.createFunction(
       }
     );
     const aiResumeReport = await AiResumeAnalyzerAgent.run(pdfText);
-    return aiResumeReport;
+    console.log("AI Resume Report:", aiResumeReport);
+
+    let rawContent: string | undefined;
+    const firstOutput = aiResumeReport.output?.[0];
+
+    if (firstOutput && "content" in firstOutput && typeof firstOutput.content === "string") {
+      rawContent = firstOutput.content;
+    } else {
+      rawContent = undefined;
+    }
+
+    const rawContentJson = rawContent?.replace('```json', '').replace('```', '').trim();
+    const parsedReport = rawContentJson ? JSON.parse(rawContentJson) : undefined;
+    // return parsedReport;
+
+
+    const saveToDb = await step.run('SaveToDb',async()=>{
+      const result = await db.insert(HistoryTable).values({
+        recordId:recordId,
+        content: parsedReport,
+        aiAgentType: aiAgentType,
+        createdAt: (new Date()).toString(),
+        userEmail: userEmail,
+        metadata: uploadFileUrl
+      })
+      console.log(result); 
+      return parsedReport
+    })
   },
 )
 
+export const AiRoadmapGeneratorAgent = createAgent({
+  name: "ai-roadmap-generator-agent",
+  description: "An agent that generates personalized career roadmaps based on user input.",
+  system: `Generate a React flow tree-structured learning roadmap for user input position/ skills the following format:
+vertical tree structure with meaningful x/y positions to form a flow
+• Structure should be similar to roadmap.sh layout
+• Steps should be ordered from fundamentals to advanced
+• Include branching for different specializations (if applicable)
+• Each node must have a title, short description, and learning resource link
+• Use unique IDs for all nodes and edges
+• make it more specious node position,
+• Response n JSON format
+{
+  roadmapTitle: "",
+  description: <3-5 Lines>,
+  duration: "",
+  initialNodes: [
+    {
+      id: '1',
+      type: 'turbo',
+      position: { x: 0, y: 0 },
+      data: {
+        title: 'Step Title',
+        description: 'Short two-line explanation of what the step covers.',
+        link: 'Helpful link for learning this step',
+      },
+    },
+    ...
+  ],
+  initialEdges: [
+    {
+      id: 'e1-2',
+      source: '1',
+      target: '2',
+    },
+    ...
+  ];
+}
+`
+})
+
+export const AiRoadmapGenerator = inngest.createFunction(
+  { id: "ai-roadmap-generator-agent" },
+  { event: "ai-roadmap-generator-agent" },
+  async ({ event, step }) => {
+    const { raodmapId, userInput, userEmail } = await event.data;
+    const result = await AiRoadmapGeneratorAgent.run("UserInput:"+userInput);
+    return result;
+  },
+);
+ 
+ 

@@ -10,10 +10,12 @@ import { File, Loader2Icon, Sparkles } from "lucide-react";
 import { v4 as uuid4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const ResumeUploadDialog = ({openResumeDialog,setOpenResumeDialog}: any) => {
 
     const [file, setFile] = React.useState<File | null>(null);
+    const router = useRouter();
     const [apiLoading,setApiLoading] = React.useState<boolean>(false);
     const onFileChange = (event:any) => {
         const file = event.target.files?.[0];
@@ -36,6 +38,8 @@ const ResumeUploadDialog = ({openResumeDialog,setOpenResumeDialog}: any) => {
         const result = await axios.post('/api/ai-resume-agent', formData)
         console.log("Result from AI Resume Agent:", result.data);
         setApiLoading(false);
+
+        router.push(`/ai-tools/ai-resume-analyzer/${recordId}`);
       }
   return (
     <Dialog open={openResumeDialog} onOpenChange={setOpenResumeDialog}>
