@@ -24,7 +24,7 @@ export async function POST(req:any){
         }
         await new Promise(resolve => setTimeout(resolve, 500)); 
     }
-    return NextResponse.json(runStatus.data?.[0].output?.output[0]);
+    return NextResponse.json(runStatus.data?.[0]);
 }
 
 async function getRuns(runId: string) {
