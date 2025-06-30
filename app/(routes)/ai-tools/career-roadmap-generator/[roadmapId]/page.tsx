@@ -104,7 +104,6 @@ const AiRoadmapAgent = () => {
             nodeTypes={nodeTypes}
             fitView
             panOnScroll
-            panOnScrollMode="free"
           >
             <MiniMap />
             <Controls />
