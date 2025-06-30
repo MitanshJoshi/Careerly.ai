@@ -19,22 +19,12 @@ export async function POST(req:any){
     while(true){
         runStatus = await getRuns(runId);
         console.log("Run status:", runStatus);
-        if(runStatus.data[0]?.status === "Completed"){
+        if(runStatus?.data[0]?.status === "Completed"){
             break;
         }
         await new Promise(resolve => setTimeout(resolve, 500)); 
     }
-
-    const output =
-        runStatus?.data &&
-        Array.isArray(runStatus.data) &&
-        runStatus.data[0]?.output
-            ? runStatus.data[0].output
-            : { error: "No output found", runStatus };
-
-    console.log("Final runStatus:", JSON.stringify(runStatus, null, 2));
-
-    return NextResponse.json(output);
+    return NextResponse.json(runStatus.data?.[0].output?.output[0]);
 }
 
 async function getRuns(runId: string) {
