@@ -28,12 +28,11 @@ export async function POST(req:any){
     const output =
         runStatus?.data &&
         Array.isArray(runStatus.data) &&
-        runStatus.data[0]?.output?.output &&
-        Array.isArray(runStatus.data[0].output.output)
-            ? runStatus.data[0].output.output[0]
+        runStatus.data[0]?.output
+            ? runStatus.data[0].output
             : { error: "No output found", runStatus };
 
-            console.log("Final runStatus:", JSON.stringify(runStatus, null, 2));
+    console.log("Final runStatus:", JSON.stringify(runStatus, null, 2));
 
     return NextResponse.json(output);
 }
