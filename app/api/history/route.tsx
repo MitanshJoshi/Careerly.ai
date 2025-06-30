@@ -1,7 +1,7 @@
 import { db } from "@/configs/db";
 import { HistoryTable } from "@/configs/schema";
 import { currentUser } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(req: any){
@@ -40,10 +40,13 @@ export async function GET(req: any){
 
     const recordId = searchParams.get("recordId");
     try{
-        if (!recordId) {
-            return NextResponse.json({ error: "recordId is required" }, { status: 400 });
+        let result
+        if (recordId) {
+            result = await db.select().from(HistoryTable).where(eq(HistoryTable.recordId, recordId));
         }
-        const result = await db.select().from(HistoryTable).where(eq(HistoryTable.recordId, recordId));
+        else {
+            result = await db.select().from(HistoryTable).where(eq(HistoryTable.userEmail, (await currentUser())?.primaryEmailAddress?.emailAddress || "")).orderBy(desc(HistoryTable.id));
+        }
         return NextResponse.json(result);
     }catch(e){
         return NextResponse.json({error: e.message}, {status: 500});

@@ -23,12 +23,12 @@ const items = [
     },
     {
         title: "AI Tools",
-        url: "#",
+        url: "/ai-tools",
         icon: Inbox,
     },
     {
         title: "My History",
-        url: "#",
+        url: "/myHistory",
         icon: Calendar,
     },
     {

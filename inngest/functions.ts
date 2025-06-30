@@ -1,7 +1,7 @@
 import { gemini, openai } from "inngest";
 import { inngest } from "./client";
 import ImageKit from "imagekit";
-import { createAgent, anthropic } from '@inngest/agent-kit';
+import { createAgent, anthropic } from "@inngest/agent-kit";
 import { db } from "@/configs/db";
 import { HistoryTable } from "@/configs/schema";
 
@@ -11,39 +11,41 @@ export const helloWorld = inngest.createFunction(
   async ({ event, step }) => {
     await step.sleep("wait-a-moment", "1s");
     return { message: `Hello ${event.data.email}!` };
-  },
+  }
 );
 
 export const AiCareerChatAgent = createAgent({
   name: "AiCareerChatAgent",
-  description: "An agent that can answer questions about career advice, job search, and related topics.",
-  system:"You are a helpful AI career advisor. Answer questions about career advice, job search, and related topics. Provide concise and accurate information.",
-  model:gemini({
+  description:
+    "An agent that can answer questions about career advice, job search, and related topics.",
+  system:
+    "You are a helpful AI career advisor. Answer questions about career advice, job search, and related topics. Provide concise and accurate information.",
+  model: gemini({
     model: "gemini-2.5-flash",
     apiKey: process.env.GEMINI_API_KEY,
-  })
-})
+  }),
+});
 
 export const AiCareerChat = inngest.createFunction(
   { id: "ai-career-chat" },
   { event: "ai-career-chat" },
   async ({ event, step }) => {
     const { userInput } = await event.data;
-    const result = await AiCareerChatAgent.run(userInput)
+    const result = await AiCareerChatAgent.run(userInput);
     return result;
-  },
+  }
 );
 
 var imagekit = new ImageKit({
-  publicKey : `${process.env.IMAGEKIT_PUBLIC_API_KEY}`,
-  privateKey : `${process.env.IMAGEKIT_PRIVATE_API_KEY}`,
-  urlEndpoint : `https://ik.imagekit.io/${process.env.IMAGEKIT_ID}/`
+  publicKey: `${process.env.IMAGEKIT_PUBLIC_API_KEY}`,
+  privateKey: `${process.env.IMAGEKIT_PRIVATE_API_KEY}`,
+  urlEndpoint: `https://ik.imagekit.io/${process.env.IMAGEKIT_ID}/`,
 });
 
 export const AiResumeAnalyzerAgent = createAgent({
   name: "ai-resume-agent",
   description: "An agent that can analyze resumes and provide feedback.",
-  system:`🧠 You are an advanced AI Resume Analyzer Agent.  
+  system: `🧠 You are an advanced AI Resume Analyzer Agent.  
 Your task is to evaluate a candidate’s resume and return a detailed analysis in the following structured JSON schema format.  
 The schema must match the layout and structure of a visual UI that includes overall score, section scores, summary feedback, improvement tips, strengths, and weaknesses.
 
@@ -122,68 +124,77 @@ json
   ]
 }
 `,
-  model:gemini({
+  model: gemini({
     model: "gemini-2.5-flash",
     apiKey: process.env.GEMINI_API_KEY,
-  })
-
-})
+  }),
+});
 
 export const AiResumeAgent = inngest.createFunction(
   { id: "ai-resume-agent" },
   { event: "ai-resume-agent" },
 
   async ({ event, step }) => {
-    const { recordId, base64ResumeFile, pdfText, aiAgentType, userEmail } = await event.data;
+    const { recordId, base64ResumeFile, pdfText, aiAgentType, userEmail } =
+      await event.data;
 
-    const uploadFileUrl = await step.run(
-      "upload-image",
-      async () => {
-        const uploadResponse = await imagekit.upload({
-          file: base64ResumeFile,
-          fileName: `${Date.now()}.pdf`,
-          useUniqueFileName: true,
-          isPublished:true,  
-        });
+    const uploadFileUrl = await step.run("upload-image", async () => {
+      const uploadResponse = await imagekit.upload({
+        file: base64ResumeFile,
+        fileName: `${Date.now()}.pdf`,
+        useUniqueFileName: true,
+        isPublished: true,
+      });
 
-        return uploadResponse.url;
-      }
-    );
+      return uploadResponse.url;
+    });
     const aiResumeReport = await AiResumeAnalyzerAgent.run(pdfText);
     console.log("AI Resume Report:", aiResumeReport);
 
     let rawContent: string | undefined;
     const firstOutput = aiResumeReport.output?.[0];
 
-    if (firstOutput && "content" in firstOutput && typeof firstOutput.content === "string") {
+    if (
+      firstOutput &&
+      "content" in firstOutput &&
+      typeof firstOutput.content === "string"
+    ) {
       rawContent = firstOutput.content;
     } else {
       rawContent = undefined;
     }
 
-    const rawContentJson = rawContent?.replace('```json', '').replace('```', '').trim();
-    const parsedReport = rawContentJson ? JSON.parse(rawContentJson) : undefined;
+    const rawContentJson = rawContent
+      ?.replace("```json", "")
+      .replace("```", "")
+      .trim()
+      // Remove all JS-style comments from the JSON string
+      .replace(/^\s*\/\/.*$/gm, "");
+
+    const parsedReport = rawContentJson
+      ? JSON.parse(rawContentJson)
+      : undefined;
     // return parsedReport;
 
-
-    const saveToDb = await step.run('SaveToDb',async()=>{
+    const saveToDb = await step.run("SaveToDb", async () => {
       const result = await db.insert(HistoryTable).values({
-        recordId:recordId,
+        recordId: recordId,
         content: parsedReport,
         aiAgentType: aiAgentType,
-        createdAt: (new Date()).toString(),
+        createdAt: new Date().toString(),
         userEmail: userEmail,
-        metadata: uploadFileUrl
-      })
-      console.log(result); 
-      return parsedReport
-    })
-  },
-)
+        metadata: uploadFileUrl,
+      });
+      console.log(result);
+      return parsedReport;
+    });
+  }
+);
 
 export const AiRoadmapGeneratorAgent = createAgent({
   name: "ai-roadmap-generator-agent",
-  description: "An agent that generates personalized career roadmaps based on user input.",
+  description:
+    "An agent that generates per sonalized career roadmaps based on user input.",
   system: `Generate a React flow tree-structured learning roadmap for user input position/ skills the following format:
 vertical tree structure with meaningful x/y positions to form a flow
 • Structure should be similar to roadmap.sh layout
@@ -191,7 +202,10 @@ vertical tree structure with meaningful x/y positions to form a flow
 • Include branching for different specializations (if applicable)
 • Each node must have a title, short description, and learning resource link
 • Use unique IDs for all nodes and edges
+* dont add any comments in the JSON response, just return the JSON object as it is.
 • make it more specious node position,
+• mak everything spaceious and clear the roadmap must look clean and easy to follow
+• Use a maximum of 10 nodes for the initial roadmap
 • Response n JSON format
 {
   roadmapTitle: "",
@@ -219,17 +233,55 @@ vertical tree structure with meaningful x/y positions to form a flow
     ...
   ];
 }
-`
-})
+`,
+  model: gemini({
+    model: "gemini-2.5-flash",
+    apiKey: process.env.GEMINI_API_KEY,
+  }),
+});
 
 export const AiRoadmapGenerator = inngest.createFunction(
   { id: "ai-roadmap-generator-agent" },
   { event: "ai-roadmap-generator-agent" },
   async ({ event, step }) => {
-    const { raodmapId, userInput, userEmail } = await event.data;
-    const result = await AiRoadmapGeneratorAgent.run("UserInput:"+userInput);
-    return result;
-  },
+    const { roadmapId, userInput, userEmail } = await event.data;
+    console.log("Roadmap ID:", roadmapId);
+    const result = await AiRoadmapGeneratorAgent.run("UserInput:" + userInput);
+    let rawContent: string | undefined;
+    const firstOutput = result.output?.[0];
+
+    if (
+      firstOutput &&
+      "content" in firstOutput &&
+      typeof firstOutput.content === "string"
+    ) {
+      rawContent = firstOutput.content;
+    } else {
+      rawContent = undefined;
+    }
+
+    const rawContentJson = rawContent
+      ?.replace("```json", "")
+      .replace("```", "")
+      .trim();
+
+      console.log("Raw Content JSON:", rawContentJson);
+    const parsedReport = rawContentJson
+      ? JSON.parse(rawContentJson)
+      : undefined;
+    // return parsedReport;
+
+    const saveToDb = await step.run("SaveToDb", async () => {
+      const result = await db.insert(HistoryTable).values({
+        recordId: roadmapId,
+        content: parsedReport,
+        aiAgentType: '/ai-tools/career-roadmap-generator',
+        createdAt: new Date().toString(),
+        userEmail: userEmail,
+        metadata: userInput,
+      });
+      console.log(result);
+      return parsedReport;
+    });
+  }
 );
- 
- 

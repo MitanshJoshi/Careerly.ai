@@ -1,4 +1,4 @@
-import Button from '@/components/CustomButton'
+import { Button } from '@/components/ui/button'
 import React from 'react'
 
 const WelcomeBanner = () => {
@@ -13,7 +13,7 @@ const WelcomeBanner = () => {
                 Unlock personalized guidance, smart tools, and expert resources to help you achieve your professional goals faster and more efficiently.
                 </p>
             <Button>
-                Get Started
+                Let's Get Started
             </Button>
         </div>
     </div>

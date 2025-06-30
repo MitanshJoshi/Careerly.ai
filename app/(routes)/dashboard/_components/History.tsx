@@ -1,12 +1,63 @@
 "use client"
-import React, { useState } from 'react'
-import { Lightbulb } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Lightbulb, Loader2Icon } from 'lucide-react'
 import Image from 'next/image'
-import Button from '@/components/CustomButton'
+import { Button } from '@/components/ui/button'
+import { aiToolsList } from './AiTools'
+import Link from 'next/link'
 
 const History = () => {
   // You can replace this with actual history data in the future
-  const [userHistory, setuserHistory] = useState([]);
+  interface HistoryItem {
+    aiAgentType: string;
+    description: string;
+    createdAt: string;
+    recordId: string;
+  }
+
+  const [userHistory, setuserHistory] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    fetchUserHistory();
+  }, []);
+
+  const fetchUserHistory = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/history');
+      if (!response.ok) {
+        throw new Error('Failed to fetch history');
+      }
+      const data = await response.json(); 
+      setuserHistory(data);
+      console.log('User History:', data);
+      setLoading(false);
+    }
+    catch (error) {
+      setLoading(false);
+      console.error('Error fetching user history:', error);
+    }
+  }
+
+  const getAiAgentName = (path: string) => {
+    const name = aiToolsList.find(tool => tool.path === path)?.name;
+    return name;
+  }
+
+  const getAiAgentIcon = (path: string) => {
+    const icon = aiToolsList.find(tool => tool.path === path)?.icon;
+    return icon
+  }
+
+  if(loading) {
+    return (
+      <div className='flex items-center justify-center min-h-[220px]'>
+        <Loader2Icon className='animate-spin text-gray-500' size={40} />
+        <p className='text-gray-600 font-bold text-sm md:text-lg ml-2'>Loading your history...</p>
+      </div>
+    );
+  }
 
   return (
     <div className='mt-7 rounded-xl border bg-white p-5'>
@@ -16,13 +67,37 @@ const History = () => {
         </p>
     <div className='flex flex-col items-center justify-center min-h-[220px]'>
       {userHistory.length > 0 ? (
-        <div>
-          {/* Render previous history here */}
+        <div className='w-full'>
+          <div className="space-y-4 w-full" >
+            {userHistory.map((historyItem, index) => (
+              <Link
+                key={index}
+                href={`${historyItem.aiAgentType}/${historyItem.recordId}`}
+                className="flex items-center w-full justify-between px-2 py-1 border rounded-lg shadow hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={getAiAgentIcon(historyItem.aiAgentType) || '/default-icon.png'}
+                    alt={getAiAgentName(historyItem.aiAgentType) || 'AI Agent'}
+                    width={50}
+                    height={50}
+                  />
+                  <h3 className="text-base font-semibold">{getAiAgentName(historyItem.aiAgentType)}</h3>
+                </div>
+                <p
+                  className="text-xs text-gray-500 font-mono w-[210px] text-right"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Date: {new Date(historyItem.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col items-center">
         <Image src={'/bulb.svg'} alt='No History' width={100} height={100}/>
-          <p className="text-gray-600 font-bold text-lg mb-4 mt-4">You do not have any history yet</p>
+          <p className="text-gray-600 font-bold text-sm md:text-lg mb-4 mt-4">You do not have any history yet</p>
           <Button>
             Get Started
           </Button>

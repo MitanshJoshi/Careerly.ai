@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/components/CustomButton";
+
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import React from "react";
 import { v4 as uuidv4 } from "uuid";
 import ResumeUploadDialog from "./ResumeUploadDialog";
 import RoadmapDialog from "./RoadmapDialog";
+import { Button } from "@/components/ui/button";
 
 interface AiTool {
   name: string;
@@ -55,9 +56,9 @@ const AiToolsList: React.FC<AiToolsListProps> = ({ aiToolsList }) => {
         >
           <div className="flex items-center gap-3 mb-2">
             <Image width={50} height={50} src={tool.icon} alt={tool.name} />
-            <h3 className="text-xl font-semibold">{tool.name}</h3>
+            <h3 className=" text-sm md:text-xl font-semibold">{tool.name}</h3>
           </div>
-          <p className="text-gray-600 mb-4 flex-1">{tool.description}</p>
+          <p className="text-gray-600 mb-4 flex-1 md:text-lg text-sm">{tool.description}</p>
           <Button onClick={() => onClickHandler(tool)}>{tool.button}</Button>
         </div>
       ))}

@@ -4,7 +4,7 @@ import React from 'react'
 import AiToolsList from './AiToolsList'
 
 
-const aiToolsList = [
+export const aiToolsList = [
     {
         name: "AI Career Q&A Chat",
         description: "Get instant answers to your career-related questions with our AI-powered chat assistant.",
@@ -17,7 +17,7 @@ const aiToolsList = [
         description: "Get instant feedback on your resume with our AI-powered resume analyzer.",
         icon: "/resume.png",
         button:'Analyze Now',
-        path:'/ai-resume-analyzer'
+        path:'/ai-tools/ai-resume-analyzer'
     },
     {
         name: "Career Roadmap Generator",
@@ -31,7 +31,7 @@ const aiToolsList = [
         description: "Craft a compelling cover letter with our AI-powered cover letter builder.",
         icon: "/cover.png",
         button:'Build Cover Letter',
-        path:'/cover-letter-generator'
+        path:'/ai-tools/cover-letter-generator'
     },
 ]
 
