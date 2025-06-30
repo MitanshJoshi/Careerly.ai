@@ -81,6 +81,8 @@ const AiChat = () => {
       const result = await axios.post("/api/ai-career-chat-agent", {
         userInput: userInput,
       });
+
+      console.log("AI Response:", result.data);
       setMessageList((prev) => [...prev, result.data]);
     } catch (e) {
       setMessageList((prev) => [
