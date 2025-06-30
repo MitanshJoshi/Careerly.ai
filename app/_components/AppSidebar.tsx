@@ -49,8 +49,8 @@ export function AppSidebar() {
         <Sidebar>
             <SidebarHeader>
             <div className='p-4 flex  items-center'>
-            <Image src={'/logo.webp'} alt="Careerly.Ai logo" width={40} height={40} />
-            <span className="text-xl font-bold text-[#025B9D] ml-2 tracking-tight">Careerly.Ai</span>
+            <Image src={'/logo.webp'} alt="Careerly.ai logo" width={40} height={40} />
+            <span className="text-xl font-bold text-[#025B9D] ml-2 tracking-tight">Careerly.ai</span>
           </div>
             </SidebarHeader>
             <SidebarContent>
