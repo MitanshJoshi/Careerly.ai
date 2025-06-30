@@ -18,6 +18,6 @@ export async function POST() {
         }).onConflictDoNothing(); // Avoid duplicate errors
         return NextResponse.json(result);
     } catch (e) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: (e instanceof Error ? e.message : "Unknown error") }, { status: 500 });
     }
 }
