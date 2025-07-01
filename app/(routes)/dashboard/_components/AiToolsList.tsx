@@ -59,7 +59,7 @@ const AiToolsList: React.FC<AiToolsListProps> = ({ aiToolsList }) => {
             <h3 className=" text-sm md:text-xl font-semibold">{tool.name}</h3>
           </div>
           <p className="text-gray-600 mb-4 flex-1 md:text-lg text-sm">{tool.description}</p>
-          <Button onClick={() => onClickHandler(tool)}>{tool.button}</Button>
+          <Button disabled={tool.name==="Cover Letter Builder"} onClick={() => onClickHandler(tool)}>{tool.name==="Cover Letter Builder"? "coming soon" : tool.button}</Button>
         </div>
       ))}
       <ResumeUploadDialog
