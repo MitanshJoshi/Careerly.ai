@@ -21,7 +21,7 @@ export const AiCareerChatAgent = createAgent({
   system:
     "You are a helpful AI career advisor. Answer questions about career advice, job search, and related topics. Provide concise and accurate information.",
   model: gemini({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.6-flash",
     apiKey: process.env.GEMINI_API_KEY,
   }),
 });
@@ -125,7 +125,7 @@ json
 }
 `,
   model: gemini({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.6-flash",
     apiKey: process.env.GEMINI_API_KEY,
   }),
 });
@@ -235,7 +235,7 @@ vertical tree structure with meaningful x/y positions to form a flow
 }
 `,
   model: gemini({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.6-flash",
     apiKey: process.env.GEMINI_API_KEY,
   }),
 });
