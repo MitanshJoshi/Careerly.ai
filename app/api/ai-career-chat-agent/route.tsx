@@ -22,7 +22,10 @@ export async function POST(req:any){
         if(runStatus?.data[0]?.status === "Completed"){
             break;
         }
-        await new Promise(resolve => setTimeout(resolve, 500)); 
+        if(runStatus?.data[0]?.status === "Failed"){
+            return NextResponse.json({error: "Run failed"}, {status: 500});
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
     }
     return NextResponse.json(runStatus.data?.[0].output?.output[0]);
 }
